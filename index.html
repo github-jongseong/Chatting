@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Socket.IO 채팅</title>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <style>
+    /* 채팅창 */
+    .chat-container {
+      display: flex;
+      flex-direction: column;
+      height: 80vh; /* 화면의 80%만 차지하도록 설정 */
+      overflow-y: scroll; /* 메시지가 쌓이면 스크롤바 표시 */
+    }
+
+    /* 채팅 메시지 박스 */
+    .message {
+      list-style-type: none;
+      margin-bottom: 10px;
+      padding: 10px;
+      border-radius: 5px;
+      max-width: 10%;
+    }
+
+    /* 보낸 메시지 스타일 */
+    .sender {
+      background-color: #DCF8C6; /* 사용자1의 메시지는 오른쪽에 표시 */
+    }
+
+    /* 받은 메시지 스타일 */
+    .receiver {
+      background-color: #E0E0E0; /* 사용자2와 사용자3의 메시지는 왼쪽에 표시 */
+    }
+  </style>
+</head>
+<body>
+  <!-- 채팅 메시지를 표시할 컨테이너 -->
+  <div class="chat-container" id="chat-container">
+    <ul id="messages"></ul>
+  </div>
+  <!-- 메시지 입력 폼 -->
+  <form id="form" action="">
+    <input id="input" autocomplete="off" /><button>Send</button>
+  </form>
+  <script>
+    var socket = io();
+
+    // 메시지 전송 폼이 제출되었을 때
+    $('#form').submit(function(){
+      // 입력한 메시지를 서버로 전송
+      socket.emit('chat message', { message: $('#input').val() });
+
+      // 입력창 비우기
+      $('#input').val('');
+
+	  // 폼의 기본 동작 막기
+      return false;
+    });
+
+    // 서버로부터 새로운 메시지가 도착했을 때
+    socket.on('chat message', function(data){
+      // 메시지를 보낸 사용자인지 확인
+      var senderClass = (data.sender === socket.id) ? 'sender' : 'receiver';
+
+      // 메시지를 채팅 창에 추가
+      $('#messages').append($('<li>').addClass('message ' + senderClass).text(data.message));
+
+      // 채팅 창을 아래로 스크롤하여 메시지를 보이도록 함
+      $('#chat-container').scrollTop($('#chat-container')[0].scrollHeight);
+    });
+  </script>
+</body>
+</html>
