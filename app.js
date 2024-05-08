@@ -1,4 +1,6 @@
-// app.js
+/* 터미널에 'npm install' 입력 후 엔터
+그 후, 터미널에 'npm start' 입력 후 엔터
+그 후, url창에 localhost:3000 입력 */
 
 const express = require('express');
 const http = require('http');
