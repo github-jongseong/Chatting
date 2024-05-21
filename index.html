@@ -10,124 +10,130 @@
         * {
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
         }
         html, body {
             height: 100%;
+            font-family: Arial, sans-serif;
         }
         .wrapper {
             height: 100%;
-            width: 100%;
             display: flex;
             flex-direction: column;
-            overflow: hidden;
-        }
-        .user-container {
-            background: #a9bdce;
-            flex: 1;
-            display: flex;
-            justify-content: flex-start;
-            align-items: center;
-            padding: 0.5rem;
-        }
-        .user-container label {
-            font-size: 14px;
-            margin-right: 1rem;
-        }
-        .user-container input {
-            border-radius: 3px;
-            border: none;
-            height: 100%;
         }
         .display-container {
-            flex: 12;
-            background: #b2c7d9;
-            overflow-y: scroll;
+            flex: 1;
+            background: #a9bdce;
+            overflow-y: auto;
+            padding: 20px; 
         }
         .input-container {
-            flex: 1;
             display: flex;
-            justify-content: stretch;
-            align-items: stretch;
-        }
-        .input-container span {
-            display: flex;
-            justify-content: flex-start;
             align-items: center;
-            padding: 0.3rem;
-            width: 100%;
+            padding: 10px;
+            background: #a9bdce;
         }
-        .chatting-input {
-            font-size: 12px;
-            height: 100%;
-            flex: 8;
+        .input-container input {
+            flex: 1;
+            border-radius: 3px;
             border: none;
+            height: 40px;
+            padding: 0 10px; 
+            font-size: 18px; 
         }
         .send-button {
-            flex: 1;
             background: #ffeb33;
             border: none;
-            height: 100%;
+            height: 40px;
             border-radius: 3px;
+            padding: 0 15px; 
+            margin-left: 10px; 
+            cursor: pointer;
+            font-size: 18px; 
+            transition: background 0.3s ease;
         }
-        .chatting-list li{
-            width: 90%;
-            padding: 0.3rem;
+        .send-button:hover {
+            background: #ffd700;
+        }
+        .chatting-list {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+        .chatting-list li {
+            margin: 10px 0; 
             display: flex;
+        }
+        .chatting-list li.sent {
+            justify-content: flex-end;
+        }
+        .chatting-list li.received {
             justify-content: flex-start;
-            align-items: flex-end;
-            margin-top: 0.5rem;
         }
-        .profile{
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-        .profile .user{
-            font-size: 10px;
-            margin-bottom: 0.3rem;
-        }
-        .profile .image{
-            border-radius: 50%;
-            object-fit: cover;
-            width: 50px;
-            height: 50px;
-        }  
-        .message{
+        .message {
             border-radius: 5px;
-            padding: 0.5rem;
-            font-size: 12px;
-            margin: 0.5px;
-            flex: 7;
+            padding: 10px 15px; 
+            font-size: 18px; 
+            display: inline-block;
+            max-width: 50%; 
+            white-space: pre-wrap; 
+            line-height: 1.4; 
+            margin: 0 5px; 
         }
-        .time{
-            font-size: 10px;
-            margin: 0.5px;
-        }
-        .sent .message{
+        .sent .message {
             background: #ffeb33;
         }
-        .received .message{
+        .received .message {
             background: #fff;
         }
     </style>
 </head>
 <body>
     <div class="wrapper">
-        <div class="user-container">
-            <label for="nickname">대화명</label>
-            <input type="text" id="nickname">
-        </div>
-        <div class="display-container">
-            <ul class="chatting-list">
-                <li class="sent"></li>
-                <li class="message"></li>
+        <div class="display-container" id="chat-container">
+            <ul class="chatting-list" id="messages">
             </ul>
         </div>
         <div class="input-container">
-            <input type="text" class="chatting-input">
-            <button class="send-button">전송</button>
+            <input type="text" id="input" class="chatting-input" autocomplete="off">
+            <button id="submit-btn" class="send-button">전송</button>
         </div>
     </div> 
+    <script>
+        var socket = io();
+    
+        $('#submit-btn').click(function(){
+            sendMessage();
+        });
+
+        $('#input').keypress(function(e) {
+            if(e.which == 13) {
+                sendMessage();
+            }
+        });
+
+        function sendMessage() {
+            var message = $('#input').val().trim();
+            if (message === '') return; 
+
+            socket.emit('chat message', { message: message, sender: socket.id });
+
+            $('#input').val('');
+        }
+
+        socket.on('chat message', function(data){
+
+            var senderClass = (data.sender === socket.id) ? 'sent' : 'received';
+
+            var messageItem = $('<li>').addClass(senderClass);
+            var messageContent = $('<span>').addClass('message').text(data.message);
+            messageItem.append(messageContent);
+            $('#messages').append(messageItem);
+
+            $('#chat-container').scrollTop($('#chat-container')[0].scrollHeight);
+        });
+    </script>
 </body>
 </html>
+
+
