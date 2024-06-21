@@ -10,6 +10,9 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIo(server);
 
+const hostname = '0.0.0.0'; // 모든 IP에서 접근 가능하게 설정
+const port = 12000; // 사용할 포트
+
 // 루트 URL에 대한 GET 요청에 대한 응답
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/index.html');
@@ -34,6 +37,6 @@ io.on('connection', (socket) => {
 });
 
 // 서버를 3000번 포트에서 실행
-server.listen(3000, () => {
-  console.log('서버가 3000번 포트에서 실행 중입니다.');
+server.listen(port, hostname,() => {
+  console.log(`Server running at http://${hostname}:${port}/`);
 });
